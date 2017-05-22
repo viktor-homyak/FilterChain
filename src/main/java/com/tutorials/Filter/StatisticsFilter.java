@@ -8,7 +8,7 @@ import org.hibernate.Session;
  * Created by vhomyak on 19.05.2017.
  */
 public class StatisticsFilter implements Filter {
-    Session session;
+    private Session session;
     private Filter nextFilter;
 
     public StatisticsFilter(DBBroker broker) {
@@ -18,7 +18,8 @@ public class StatisticsFilter implements Filter {
 
     @Override
     public void execute(AnimalEntity animal) {
-        System.out.println("execute StatisticsFilter");
+        System.out.println(" ");
+        System.out.println("starting to execute StatisticsFilter");
         session.close();
 
         if(nextFilter!=null){

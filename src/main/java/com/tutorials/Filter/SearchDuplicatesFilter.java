@@ -11,7 +11,7 @@ import org.hibernate.Transaction;
  */
 public class SearchDuplicatesFilter implements Filter {
 
-    Session session;
+    private Session session;
     private Filter nextFilter;
 
     public SearchDuplicatesFilter(DBBroker broker) {
@@ -20,6 +20,7 @@ public class SearchDuplicatesFilter implements Filter {
 
     @Override
     public void execute(AnimalEntity animal) {
+        System.out.println(" ");
         System.out.println("Starting to execute SearchDuplicatesFilter");
 
        Query query= session.createSQLQuery("select count(*) from animal where name IN (SELECT name from animal where id=:param)")
