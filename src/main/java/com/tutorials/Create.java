@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,15 +29,16 @@ public class Create {
         File kotikFile = new File("src/main/resources/kotik.jpg");
         byte[] kotikByte = Files.readAllBytes(kotikFile.toPath());
 
-        List<Session> sessions = IntStream.range(0,10).mapToObj(index-> dbBroker.getConnection()).collect(Collectors.toList());
+        List<Session> sessions = IntStream.range(0,1).mapToObj(index-> dbBroker.getConnection()).collect(Collectors.toList());
         for (Session session:sessions) {
             Transaction t = session.beginTransaction();
-            List<AnimalEntity> animals = new ArrayList<>();
+            List<AnimalEntity> animals;
 
             animals = IntStream.range(0, 10000).mapToObj(index -> {
                 AnimalEntity animalEntity = new AnimalEntity();
                 animalEntity.setFace(kotikByte);
                 animalEntity.setName("Зверь" + index );
+                animalEntity.setHeight(getHeight());
                 session.save(animalEntity);
                 System.out.println(animalEntity.getId());
                 return animalEntity;
@@ -69,5 +71,15 @@ public class Create {
             t.commit();
             session.close();
         }
+    }
+
+    public static int getHeight(){
+        Random r = new Random();
+        int Low = 175;
+        int High = 190;
+        return  r.nextInt(High-Low) + Low;
+
+
+
     }
 }

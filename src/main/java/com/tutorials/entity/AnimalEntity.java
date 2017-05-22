@@ -17,9 +17,17 @@ public class AnimalEntity {
     private Integer id;
     private String name;
     private List<LimbEntity> limbs;
+    private Integer height;
 
+    @Basic
+    @Column(nullable = false)
+    public Integer getHeight() {
+        return height;
+    }
 
-
+    public void setHeight(Integer height) {
+        this.height = height;
+    }
 
     @Basic
     @Column(name = "face", nullable = false)
