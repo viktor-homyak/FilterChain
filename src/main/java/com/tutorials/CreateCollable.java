@@ -39,7 +39,7 @@ public class CreateCollable implements Callable<String> {
         animals = IntStream.range(0, numberToCreate).mapToObj(index -> {
             AnimalEntity animalEntity = new AnimalEntity();
             animalEntity.setFace(kotikByte);
-            animalEntity.setName("Зверь" + index + Thread.currentThread().getName().substring(Thread.currentThread().getName().length()-1) );
+            animalEntity.setName("Зверь " + index +" " + Thread.currentThread().getName().substring(Thread.currentThread().getName().length()-1) );
             animalEntity.setHeight(Create.getHeight());
             session.save(animalEntity);
             System.out.println(animalEntity.getName());
@@ -53,7 +53,7 @@ public class CreateCollable implements Callable<String> {
                 animalEntity.setLimbs(new LinkedList());
             animalEntity.getLimbs().add(limb);
             limb.setName("limb "+index + " of " + animalEntity.getName());
-           // limb.setOrder(index);
+            //limb.setOrder(index);
             session.save(limb);
             System.out.println(limb.getName());
 

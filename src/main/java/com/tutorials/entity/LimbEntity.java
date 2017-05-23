@@ -11,11 +11,11 @@ public class LimbEntity {
     private String name;
     private Integer id;
     private AnimalEntity animal;
-   // private Integer order;
-
-
-
-
+//    private Integer order;
+//
+//
+//
+//
 //    @Basic
 //    public Integer getOrder() {
 //        return order;
