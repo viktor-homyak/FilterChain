@@ -12,27 +12,40 @@ import org.hibernate.Transaction;
  */
 public class ChangeAttributeFilter implements Filter {
 
-    private Session session;
+
     private Filter nextFilter;
+    private DBBroker broker;
 
     public ChangeAttributeFilter(DBBroker broker) {
-        this.session =  broker.getConnection();
+        this.broker = broker;
     }
 
     @Override
     public void execute(AnimalEntity animal) {
-        System.out.println("Starting to execute changeAttribute");
-        Transaction tx = session.beginTransaction();
-        animal.setName("Was changed ");
-        session.update(animal);
-        tx.commit();
-        session.close();
+        Session session=broker.getConnection();
+        Transaction tx = null;
+        while(tx==null) {
+            try {
+                tx = session.beginTransaction();
+            } catch (Exception e) {
+                session.close();
+                session = broker.getConnection();
+            }
+        }
+        try {
+            System.out.println("Starting to execute changeAttribute");
+            animal.setName("Was changed ");
+            session.update(animal);
+            tx.commit();
+        }
+        catch (Exception ex){
+            tx.rollback();
+        }
+        finally {
+            session.close();
+        }
         if(nextFilter!=null){
             nextFilter.execute(animal);
-        }
-        while (!session.isOpen()){
-            System.out.println("ChangeAttribute session was closed");
-            break;
         }
     }
 

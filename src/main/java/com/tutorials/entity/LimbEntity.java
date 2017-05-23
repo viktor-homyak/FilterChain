@@ -1,7 +1,7 @@
 package com.tutorials.entity;
 
 import javax.persistence.*;
-
+import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * Created by Viktor on 16.05.2017.
  */
@@ -11,7 +11,19 @@ public class LimbEntity {
     private String name;
     private Integer id;
     private AnimalEntity animal;
+   // private Integer order;
 
+
+
+
+//    @Basic
+//    public Integer getOrder() {
+//        return order;
+//    }
+//
+//    public void setOrder(Integer order) {
+//        this.order = order;
+//    }
 
     @Basic
     @Column(name = "name", nullable = true, length = 30)
@@ -27,7 +39,6 @@ public class LimbEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "limb_seq")
     @SequenceGenerator(name = "limb_seq", sequenceName = "limb_id_seq", allocationSize = 1)
     @Column(name = "id", nullable = false, unique = true)
-    //TODO always return null. WTF?????
     public Integer getId() {
         return id;
     }
@@ -38,8 +49,7 @@ public class LimbEntity {
 
 
     @ManyToOne(cascade = CascadeType.ALL, targetEntity = AnimalEntity.class, fetch = FetchType.EAGER)
-    //TODO insurable, updatable = false  какую то фигню мне делало, вместо заполнения базы, поэтому убрал.
-    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    @JoinColumn(name = "animal_id", referencedColumnName = "id", insertable = false, updatable = false)
     public AnimalEntity getAnimal() {
         return animal;
     }
@@ -67,4 +77,6 @@ public class LimbEntity {
         result = 31 * result + id;
         return result;
     }
+
+
 }

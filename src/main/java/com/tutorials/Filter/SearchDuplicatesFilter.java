@@ -11,15 +11,16 @@ import org.hibernate.Transaction;
  */
 public class SearchDuplicatesFilter implements Filter {
 
-    private Session session;
     private Filter nextFilter;
+    private DBBroker broker;
 
     public SearchDuplicatesFilter(DBBroker broker) {
-        this.session =  broker.getConnection();
+        this.broker =  broker;
     }
 
     @Override
     public void execute(AnimalEntity animal) {
+        Session session=broker.getConnection();
         System.out.println(" ");
         System.out.println("Starting to execute SearchDuplicatesFilter");
 

@@ -12,17 +12,19 @@ import java.util.stream.DoubleStream;
  * Created by vhomyak on 19.05.2017.
  */
 public class StatisticsFilter implements Filter {
-    private Session session;
     private Filter nextFilter;
+    private DBBroker broker;
 
     public StatisticsFilter(DBBroker broker) {
-        this.session =  broker.getConnection();
+        this.broker =  broker;
     }
 
 
     @Override
     public void execute(AnimalEntity animal) {
+        Session session=broker.getConnection();
         System.out.println(" ");
+
         System.out.println("starting to execute StatisticsFilter");
         List<AnimalEntity> listHeight = session.createSQLQuery("select * from animal").list();
 
@@ -30,7 +32,6 @@ public class StatisticsFilter implements Filter {
            Map<Integer,Double> mean = new HashMap<>();
 
         groupedHeight.values().forEach(l->{
-
             mean.put(l.get(0).getHeight(), (double) (l.size()/10000));
         });
 //TODO this must be =1. If it is, we will find math mean, and then deviation

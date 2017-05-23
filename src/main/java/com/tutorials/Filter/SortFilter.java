@@ -13,16 +13,18 @@ import java.util.List;
  * Created by vhomyak on 19.05.2017.
  */
 public class SortFilter implements Filter {
-    private Session session;
     private Filter nextFilter;
-
+    private DBBroker broker;
 
     public SortFilter(DBBroker broker) {
-        this.session =  broker.getConnection();
+        this.broker =  broker;
     }
 
     @Override
     public void execute(AnimalEntity animal) {
+        Session session = broker.getConnection();
+
+
         System.out.println(" ");
 
         List<Integer> listId = session.createSQLQuery("select id from animal").list();

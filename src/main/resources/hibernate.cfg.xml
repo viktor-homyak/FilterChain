@@ -9,6 +9,7 @@
         <property name="connection.username">vitya</property>
         <property name="connection.password">1</property>
         <property name="hbm2ddl.auto">update</property>
+        <property name="generate_statistics">true</property>
         <mapping class="com.tutorials.entity.AnimalEntity"/>
         <mapping class="com.tutorials.entity.LimbEntity"/>
         <!-- DB schema will be updated if needed -->

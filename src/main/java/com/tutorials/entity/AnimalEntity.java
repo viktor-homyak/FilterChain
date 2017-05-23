@@ -3,6 +3,8 @@ package com.tutorials.entity;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+
+
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +44,7 @@ public class AnimalEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "animal_seq")
     @SequenceGenerator(name = "animal_seq", sequenceName = "animal_id_seq", allocationSize = 1)
-    @Column(name = "id", nullable = false, precision = 0,unique = true)
+    @Column(name = "id", nullable = false, precision = 0,unique = true, columnDefinition = "numeric(10,0)")
     public Integer getId() {
         return id;
     }
@@ -62,13 +64,13 @@ public class AnimalEntity {
     }
 
     @OneToMany(cascade = CascadeType.ALL, targetEntity = LimbEntity.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "animal_id", referencedColumnName = "id")
-    @Transient
+    @JoinColumn(name = "animal_id", referencedColumnName = "id", insertable = false, updatable = false)
+
     @Fetch(FetchMode.SUBSELECT)
     public List<LimbEntity> getLimbs() {
         return limbs;
     }
-    @Transient
+
     public void setLimbs(List<LimbEntity> limbs) {
         this.limbs = limbs;
     }

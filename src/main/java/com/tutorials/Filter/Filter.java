@@ -1,6 +1,5 @@
 package com.tutorials.Filter;
 
-import com.tutorials.DBBroker;
 import com.tutorials.entity.AnimalEntity;
 
 /**
