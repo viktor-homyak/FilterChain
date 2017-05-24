@@ -64,7 +64,7 @@ public class AnimalEntity {
     }
 
     @OneToMany(cascade = CascadeType.ALL, targetEntity = LimbEntity.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "animal_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "animal_id", referencedColumnName = "id")
 
     @Fetch(FetchMode.SUBSELECT)
     public List<LimbEntity> getLimbs() {

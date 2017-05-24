@@ -11,19 +11,20 @@ public class LimbEntity {
     private String name;
     private Integer id;
     private AnimalEntity animal;
-//    private Integer order;
-//
-//
-//
-//
-//    @Basic
-//    public Integer getOrder() {
-//        return order;
-//    }
-//
-//    public void setOrder(Integer order) {
-//        this.order = order;
-//    }
+    private Integer order;
+
+
+
+
+    @Basic
+    @Column(name = "order_id",nullable = false, columnDefinition = "numeric(10,0)")
+    public Integer getOrder() {
+        return order;
+    }
+
+    public void setOrder(Integer order) {
+        this.order = order;
+    }
 
     @Basic
     @Column(name = "name", nullable = true, length = 30)
@@ -49,7 +50,7 @@ public class LimbEntity {
 
 
     @ManyToOne(cascade = CascadeType.ALL, targetEntity = AnimalEntity.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "animal_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "animal_id", referencedColumnName = "id")
     public AnimalEntity getAnimal() {
         return animal;
     }
