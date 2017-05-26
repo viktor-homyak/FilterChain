@@ -2,11 +2,14 @@ package com.tutorials.Filter;
 
 import com.tutorials.DBBroker;
 import com.tutorials.entity.AnimalEntity;
+import com.tutorials.entity.LimbEntity;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -26,12 +29,26 @@ public class SortFilter implements Filter {
 
 
         System.out.println(" ");
+         List<LimbEntity> animalLimbs = animal.getLimbs();
 
-        List<Integer> listId = session.createSQLQuery("select id from animal").list();
-        System.out.println("Index of our animal in db is :" +listId.indexOf(animal.getId()));
-        System.out.println("starting to execute SortFilter");
-        Collections.sort(listId);
-        System.out.println("Index of our animal after sorting :" +listId.indexOf(animal.getId()));
+          animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" before sorting :" + limbEntity.getOrder()));
+
+        Collections.sort(animalLimbs, new Comparator<LimbEntity>() {
+            @Override
+            public int compare(LimbEntity o1, LimbEntity o2) {
+                int result = 0;
+                if(o1.getOrder()<o2.getOrder())
+                    result= 1;
+                if(o1.getOrder()>o2.getOrder())
+                    result= -1;
+                if(o1.getOrder()==o2.getOrder())
+                    result = 0;
+
+                return result;
+            }
+        });
+        System.out.println(" ");
+        animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" after sorting :" + limbEntity.getOrder()));
         session.close();
         if(nextFilter!=null){
             nextFilter.execute(animal);

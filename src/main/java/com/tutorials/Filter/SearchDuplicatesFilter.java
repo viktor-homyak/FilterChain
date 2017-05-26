@@ -14,6 +14,7 @@ public class SearchDuplicatesFilter implements Filter {
     private Filter nextFilter;
     private DBBroker broker;
 
+
     public SearchDuplicatesFilter(DBBroker broker) {
         this.broker =  broker;
     }
@@ -38,6 +39,7 @@ public class SearchDuplicatesFilter implements Filter {
             System.out.println("SearchDuplicatesFilter session was closed");
             break;
         }
+
 
     }
 

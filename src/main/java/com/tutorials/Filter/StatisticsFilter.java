@@ -2,6 +2,8 @@ package com.tutorials.Filter;
 
 import com.tutorials.DBBroker;
 import com.tutorials.entity.AnimalEntity;
+import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
 import java.util.*;
@@ -26,34 +28,47 @@ public class StatisticsFilter implements Filter {
         System.out.println(" ");
 
         System.out.println("starting to execute StatisticsFilter");
-        List<AnimalEntity> listHeight = session.createSQLQuery("select * from animal").list();
+        List<Integer> heights = session.createSQLQuery("select height from animal GROUP BY height").list();
+        Map<Integer,Double> heightProbabilities = new HashMap<>();
 
-        Map<Integer,List<AnimalEntity>> groupedHeight = listHeight.stream().collect(Collectors.groupingBy(AnimalEntity::getHeight));
-           Map<Integer,Double> mean = new HashMap<>();
-
-        groupedHeight.values().forEach(l->{
-            mean.put(l.get(0).getHeight(), (double) (l.size()/10000));
+        heights.forEach(height-> {
+            Query probability = session.createSQLQuery("select count(id)  from animal where height=:param GROUP BY height ").setParameter("param", height);
+            heightProbabilities.put(height, Double.valueOf(probability.uniqueResult().toString()) / 100000);
         });
-//TODO this must be =1. If it is, we will find math mean, and then deviation
-        double result = mean.values().stream().mapToDouble(Double::valueOf).sum();
 
+            double mathMean = heightProbabilities
+                    .keySet()
+                    .stream()
+                    .map(h -> h * heightProbabilities.get(h))
+                    .mapToDouble(Number::doubleValue)
+                    .sum();
+            System.out.println("Math mean of heights occurrences would be " + mathMean);
 
+           double squareMathMean = heightProbabilities
+                   .keySet()
+                   .stream()
+                   .map(h -> Math.pow(2,h * heightProbabilities.get(h)))
+                   .mapToDouble(Number::doubleValue)
+                   .sum();
+           double dispersion = Math.pow(2,mathMean)+ squareMathMean;
+        System.out.println("dispersion of heights occurrences would be " + dispersion);
 
-       session.close();
+            session.close();
 
-        if(nextFilter!=null){
-            nextFilter.execute(animal);
+            if (nextFilter != null) {
+                nextFilter.execute(animal);
+            }
+
+            while (!session.isOpen()) {
+                System.out.println("StatisticsFilter session was closed");
+                break;
+            }
         }
 
-        while (!session.isOpen()){
-            System.out.println("StatisticsFilter session was closed");
-            break;
-        }
-    }
+            @Override
+            public void setNextFilter (Filter nextfilter){
+                this.nextFilter = nextfilter;
+                System.out.println("StatisticsFilter next filter");
+            }
 
-    @Override
-    public void setNextFilter(Filter nextfilter) {
-        this.nextFilter = nextfilter;
-        System.out.println("StatisticsFilter next filter");
-    }
-}
+        }
