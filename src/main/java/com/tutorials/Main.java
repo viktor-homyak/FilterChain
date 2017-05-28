@@ -38,7 +38,7 @@ public class Main {
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,InterruptedException {
 
         DBBroker dbBroker = new DBBroker();
         dbBroker.init();
@@ -48,7 +48,9 @@ public class Main {
 
        //  while(session.isOpen()){
 
-             IntStream.range(0,5).forEach(it->{
+
+
+        IntStream.range(0,5).forEach(it->{
                  System.out.println("Enter id of desired animal:");
                  Scanner input = new Scanner(System.in);
                  AnimalEntity animalEntity =
@@ -82,32 +84,26 @@ public class Main {
              ExecutorService executorService = Executors.newScheduledThreadPool(3,factory);
 
              List<Future<String>> futures = null;
-             try {
+
                  futures = executorService.invokeAll(sessionsToExecute);
 
-             } catch (InterruptedException e) {
-                 e.printStackTrace();
-             }
 
         assert futures != null;
         for (Future<String> f : futures) {
 
-                 try {
-                     System.out.println("future.get()=" + f.get());
-                 } catch (InterruptedException | ExecutionException  | NoSuchElementException e) {
+            try {
+                System.out.println("future.get()=" + f.get());
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
 
-                     e.printStackTrace();
-                 }
-
-
-             }
-
-
+        executorService.shutdown();
 
         }
 
     private static synchronized AnimalEntity getAnimal(ArrayDeque<AnimalEntity> queue) {
-        return queue.removeLast();
+        return queue.removeFirst();
     }
 
 
