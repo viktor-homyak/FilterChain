@@ -31,7 +31,7 @@ public class SortFilter implements Filter {
         System.out.println(" ");
          List<LimbEntity> animalLimbs = animal.getLimbs();
 
-          animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" before sorting :" + limbEntity.getOrder()));
+      //    animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" before sorting :" + limbEntity.getOrder()));
 
         Collections.sort(animalLimbs, new Comparator<LimbEntity>() {
             @Override
@@ -55,7 +55,7 @@ public class SortFilter implements Filter {
         }
 
         while (!session.isOpen()){
-            System.out.println("SortFilter session was closed");
+        //    System.out.println("SortFilter session was closed");
             break;
         }
 

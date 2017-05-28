@@ -33,7 +33,7 @@ public class ChangeAttributeFilter implements Filter {
             }
         }
         try {
-            System.out.println("Starting to execute changeAttribute");
+            //System.out.println("Starting to execute changeAttribute");
 
             animal.setName("Was changed ");
             session.update(animal);

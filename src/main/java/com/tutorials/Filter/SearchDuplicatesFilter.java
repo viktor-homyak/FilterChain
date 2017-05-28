@@ -22,8 +22,8 @@ public class SearchDuplicatesFilter implements Filter {
     @Override
     public void execute(AnimalEntity animal) {
         Session session=broker.getConnection();
-        System.out.println(" ");
-        System.out.println("Starting to execute SearchDuplicatesFilter");
+//        System.out.println(" ");
+//        System.out.println("Starting to execute SearchDuplicatesFilter");
 
        Query query= session.createSQLQuery("select count(*) from animal where name IN (SELECT name from animal where id=:param)")
                 .setParameter("param", animal.getId());
@@ -36,7 +36,7 @@ public class SearchDuplicatesFilter implements Filter {
         }
 
         while (!session.isOpen()){
-            System.out.println("SearchDuplicatesFilter session was closed");
+        //    System.out.println("SearchDuplicatesFilter session was closed");
             break;
         }
 

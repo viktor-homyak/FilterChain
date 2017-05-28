@@ -33,9 +33,7 @@ public class Create {
 
         DefaultThreadFactory factory = new DefaultThreadFactory("Creating session");
 
-        List<Callable<String>> sessionsToExecute = new ArrayList<>();
-
-        sessionsToExecute = IntStream.range(0,20).mapToObj(index-> new CreateCollable(dbBroker,kotikByte,getAnimalsToCreate())).collect(Collectors.toList());
+        List<Callable<String>> sessionsToExecute = IntStream.range(0,5).mapToObj(index-> new CreateCollable(dbBroker,kotikByte,getAnimalsToCreate())).collect(Collectors.toList());
 
         ExecutorService executorService = Executors.newScheduledThreadPool(3,factory);
 

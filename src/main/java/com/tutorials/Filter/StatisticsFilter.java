@@ -25,9 +25,9 @@ public class StatisticsFilter implements Filter {
     @Override
     public void execute(AnimalEntity animal) {
         Session session=broker.getConnection();
-        System.out.println(" ");
-
-        System.out.println("starting to execute StatisticsFilter");
+//        System.out.println(" ");
+//
+//        System.out.println("starting to execute StatisticsFilter");
         List<Integer> heights = session.createSQLQuery("select height from animal GROUP BY height").list();
         Map<Integer,Double> heightProbabilities = new HashMap<>();
 
@@ -60,7 +60,7 @@ public class StatisticsFilter implements Filter {
             }
 
             while (!session.isOpen()) {
-                System.out.println("StatisticsFilter session was closed");
+         //       System.out.println("StatisticsFilter session was closed");
                 break;
             }
         }

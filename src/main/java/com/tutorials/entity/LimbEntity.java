@@ -1,7 +1,6 @@
 package com.tutorials.entity;
 
 import javax.persistence.*;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 /**
  * Created by Viktor on 16.05.2017.
  */
