@@ -60,12 +60,12 @@ public class Main {
         IntStream.range(0, 5).forEach(index -> {
             Callable<String> consumer = new Callable<String>() {
                 public String call() throws Exception {
-                    while (pool.getAnimals().size() != 0 ) {
+                    while (!pool.getAnimals().isEmpty()) {
                         Main main = new Main(dbBroker);
                         main.f1.execute(pool.consume());
                     }
 
-                    return "add good";
+                    return "all good";
                 }
             };
             sessionsToExecute.add(consumer);
@@ -80,7 +80,6 @@ public class Main {
 
 
         for (Future<String> f : futures) {
-
             try {
                 System.out.println("future.get()=" + f.get());
             } catch (ExecutionException e) {

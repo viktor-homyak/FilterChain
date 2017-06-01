@@ -68,7 +68,7 @@ public class AnimalEntity {
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
     @OrderColumn(name = "order_id",nullable = false, columnDefinition = "numeric(10,0)")
     @Fetch(FetchMode.JOIN)
-    @OrderBy("order_id asc ")
+   // @OrderBy("order_id asc ")
     public List<LimbEntity> getLimbs() {
         return limbs;
     }

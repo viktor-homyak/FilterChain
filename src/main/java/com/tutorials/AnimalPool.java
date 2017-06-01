@@ -32,29 +32,21 @@ public class AnimalPool {
     synchronized (pool) {
 
         while (pool.size() > 20) {
+            if(animals.isEmpty())
+              return "";
             pool.wait();
         }
 
+        ;
 
-        AnimalEntity animalEntity = getRemove();
-        if(animalEntity!=null){
-            pool.add(animalEntity);
-            pool.notifyAll();
-            pool.wait(200);
-        }
+            pool.add(animals.remove(0));
+           pool.notifyAll();
 
 
     }
 
         return "Added 1. Pool capacity = "+pool.size() ;
 
-    }
-
-    public synchronized AnimalEntity getRemove() {
-        if(animals.size()!=0){
-            return animals.remove(0);
-        }
-        return null;
     }
 
     public AnimalEntity consume() throws InterruptedException {
