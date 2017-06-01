@@ -33,31 +33,27 @@ public class SortFilter implements Filter {
 
       //    animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" before sorting :" + limbEntity.getOrder()));
 
-        Collections.sort(animalLimbs, new Comparator<LimbEntity>() {
-            @Override
-            public int compare(LimbEntity o1, LimbEntity o2) {
-                int result = 0;
-                if(o1.getOrder()<o2.getOrder())
-                    result= 1;
-                if(o1.getOrder()>o2.getOrder())
-                    result= -1;
-                if(o1.getOrder()==o2.getOrder())
-                    result = 0;
+  //      Collections.sort(animalLimbs, new Comparator<LimbEntity>() {
+//            @Override
+//            public int compare(LimbEntity o1, LimbEntity o2) {
+//                int result = 0;
+//                if(o1.getOrder()<o2.getOrder())
+//                    result= 1;
+//                if(o1.getOrder()>o2.getOrder())
+//                    result= -1;
+//                if(o1.getOrder()==o2.getOrder())
+//                    result = 0;
+//
+//                return result;
+//            }
+//        });
 
-                return result;
-            }
-        });
-        System.out.println(" ");
-        animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" after sorting :" + limbEntity.getOrder()));
+        animalLimbs.forEach(limbEntity -> System.out.println("Order of "+limbEntity.getName()+" with sort orderBy annotation :" + limbEntity.getOrder()));
         session.close();
         if(nextFilter!=null){
             nextFilter.execute(animal);
         }
 
-        while (!session.isOpen()){
-        //    System.out.println("SortFilter session was closed");
-            break;
-        }
 
     }
 

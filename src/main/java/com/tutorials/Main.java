@@ -2,18 +2,12 @@ package com.tutorials;
 
 import com.tutorials.Filter.*;
 import com.tutorials.entity.AnimalEntity;
-import com.tutorials.entity.LimbEntity;
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
@@ -24,9 +18,9 @@ public class Main {
 
     private Filter f1;
 
-    public Main( DBBroker broker) {
+    public Main(DBBroker broker) {
         // initialize the chain
-        this.f1 = new ChangeAttributeFilter( broker);
+        this.f1 = new ChangeAttributeFilter(broker);
         Filter f2 = new SearchDuplicatesFilter(broker);
         Filter f3 = new SortFilter(broker);
         Filter f4 = new StatisticsFilter(broker);
@@ -38,57 +32,53 @@ public class Main {
     }
 
 
-    public static void main(String[] args) throws IOException,InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
         DBBroker dbBroker = new DBBroker();
         dbBroker.init();
         Session session = dbBroker.getConnection();
 
-        ArrayDeque<AnimalEntity> queue = new ArrayDeque<>();
 
-       //  while(session.isOpen()){
-
-
-
-        IntStream.range(0,5).forEach(it->{
-                 System.out.println("Enter id of desired animal:");
-                 Scanner input = new Scanner(System.in);
-                 AnimalEntity animalEntity =
-                         (AnimalEntity)session.get(AnimalEntity.class, input.nextInt());
-                 if (animalEntity==null){
-                     System.out.println("There is no animal in DB with such id");
-
-                 }else {
-                     queue.add(animalEntity);
-                 }
-
-             });
-               session.close();
+        Query animalQuery = session.createQuery("SELECT a from AnimalEntity as a WHERE a.id in (:param)")
+                .setParameterList("param", getRandomAnimalsId());
+        List<AnimalEntity> animalEntities = animalQuery.list();
 
 
+        AnimalPool pool = new AnimalPool(animalEntities);
 
-             DefaultThreadFactory factory = new DefaultThreadFactory("Filter Thread");
-
-             List<Callable<String>> sessionsToExecute = IntStream.range(0,queue.size()).mapToObj(index-> {
-                 Callable<String> callable = new Callable<String>() {
-                     public String call() throws Exception {
-                         Main main = new Main(dbBroker);
-                         main.f1.execute(getAnimal(queue));
-
-                         return "add good";
-                     }
-                 };
-              return callable;
-             }).collect(Collectors.toList());
-
-             ExecutorService executorService = Executors.newScheduledThreadPool(3,factory);
-
-             List<Future<String>> futures = null;
-
-                 futures = executorService.invokeAll(sessionsToExecute);
+        session.close();
 
 
-        assert futures != null;
+        DefaultThreadFactory factory = new DefaultThreadFactory("Filter Thread");
+        List<Callable<String>> sessionsToExecute = new ArrayList<>();
+
+
+        IntStream.range(0, 5).forEach(index -> {
+            sessionsToExecute.add(new AnimalProducer(pool));
+        });
+
+        IntStream.range(0, 5).forEach(index -> {
+            Callable<String> consumer = new Callable<String>() {
+                public String call() throws Exception {
+                    while (pool.getAnimals().size() != 0 ) {
+                        Main main = new Main(dbBroker);
+                        main.f1.execute(pool.consume());
+                    }
+
+                    return "add good";
+                }
+            };
+            sessionsToExecute.add(consumer);
+        });
+
+
+        ExecutorService executorService = Executors.newCachedThreadPool(factory);
+
+        List<Future<String>> futures = null;
+
+        futures = executorService.invokeAll(sessionsToExecute);
+
+
         for (Future<String> f : futures) {
 
             try {
@@ -100,14 +90,17 @@ public class Main {
 
         executorService.shutdown();
 
-        }
-
-    private static synchronized AnimalEntity getAnimal(ArrayDeque<AnimalEntity> queue) {
-        return queue.removeFirst();
     }
 
+    public static List<Integer> getRandomAnimalsId() {
+        Random random = new Random();
 
-    //  }
+        ArrayList<Integer> list = new ArrayList<>();
+
+        IntStream.range(0, 500).forEach(i -> list.add(Integer.valueOf(random.nextInt(100000))));
+        ;
+        return list;
+    }
 
 
 }

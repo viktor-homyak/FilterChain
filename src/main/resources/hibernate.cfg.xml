@@ -10,6 +10,9 @@
         <property name="connection.password">1</property>
         <property name="hbm2ddl.auto">update</property>
         <property name="generate_statistics">true</property>
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
+        <!--<property name="use_sql_comments">true</property>-->
         <mapping class="com.tutorials.entity.AnimalEntity"/>
         <mapping class="com.tutorials.entity.LimbEntity"/>
         <!-- DB schema will be updated if needed -->

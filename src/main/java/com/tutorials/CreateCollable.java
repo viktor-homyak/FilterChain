@@ -64,7 +64,7 @@ public class CreateCollable implements Callable<String> {
             animals.forEach(animalEntity ->IntStream.range(0, 10).forEach(index->{
                 LimbEntity limb=    new LimbEntity();
                 limb.setAnimal(animalEntity);
-                limb.setOrder(index);
+               // limb.setOrder(index);
     //            if(animalEntity.getLimbs()==null)
     //                animalEntity.setLimbs(new LinkedList());
     //            animalEntity.getLimbs().add(limb);

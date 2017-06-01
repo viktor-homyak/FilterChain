@@ -2,11 +2,12 @@ package com.tutorials.entity;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-
+import org.hibernate.annotations.Sort;
 
 
 import javax.persistence.*;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -63,10 +64,11 @@ public class AnimalEntity {
         this.name = name;
     }
 
-    @OneToMany(cascade = CascadeType.ALL, targetEntity = LimbEntity.class, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, targetEntity = LimbEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
-
-    @Fetch(FetchMode.SUBSELECT)
+    @OrderColumn(name = "order_id",nullable = false, columnDefinition = "numeric(10,0)")
+    @Fetch(FetchMode.JOIN)
+    @OrderBy("order_id asc ")
     public List<LimbEntity> getLimbs() {
         return limbs;
     }

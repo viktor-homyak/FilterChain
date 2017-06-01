@@ -18,57 +18,46 @@ public class StatisticsFilter implements Filter {
     private DBBroker broker;
 
     public StatisticsFilter(DBBroker broker) {
-        this.broker =  broker;
+        this.broker = broker;
     }
 
 
     @Override
     public void execute(AnimalEntity animal) {
-        Session session=broker.getConnection();
-//        System.out.println(" ");
-//
-//        System.out.println("starting to execute StatisticsFilter");
-        List<Integer> heights = session.createSQLQuery("select height from animal GROUP BY height").list();
-        Map<Integer,Double> heightProbabilities = new HashMap<>();
+        Session session = broker.getConnection();
 
-        heights.forEach(height-> {
-            Query probability = session.createSQLQuery("select count(id)  from animal where height=:param GROUP BY height ").setParameter("param", height);
-            heightProbabilities.put(height, Double.valueOf(probability.uniqueResult().toString()) / 100000);
-        });
+        Query meanQuery2 = session.createSQLQuery("SELECT\n" +
+                "  sum(rv*probability) as mathmean,\n" +
+                "  sum(power(rv,2)*probability) as squaremathmean\n" +
+                "FROM (SELECT\n" +
+                "        height                                                                   AS rv,\n" +
+                "        (cast(count(id) AS DOUBLE PRECISION) / cast(100000 AS DOUBLE PRECISION)) AS probability\n" +
+                "      FROM animal\n" +
+                "      GROUP BY height) AS foo");
+        List<Object> mean2 = meanQuery2.list();
 
-            double mathMean = heightProbabilities
-                    .keySet()
-                    .stream()
-                    .map(h -> h * heightProbabilities.get(h))
-                    .mapToDouble(Number::doubleValue)
-                    .sum();
-            System.out.println("Math mean of heights occurrences would be " + mathMean);
+        Object[] row= (Object[]) mean2.get(0);
 
-           double squareMathMean = heightProbabilities
-                   .keySet()
-                   .stream()
-                   .map(h -> Math.pow(2,h * heightProbabilities.get(h)))
-                   .mapToDouble(Number::doubleValue)
-                   .sum();
-           double dispersion = Math.pow(2,mathMean)+ squareMathMean;
+        Double mathMean = (Double) row[0];
+
+        System.out.println("Math mean of heights occurrences would be(sql) " +  mathMean);
+
+        Double dispersion = (Double)row[1]- mathMean*mathMean;
         System.out.println("dispersion of heights occurrences would be " + dispersion);
 
-            session.close();
+        session.close();
 
-            if (nextFilter != null) {
-                nextFilter.execute(animal);
-            }
-
-            while (!session.isOpen()) {
-         //       System.out.println("StatisticsFilter session was closed");
-                break;
-            }
+        if (nextFilter != null) {
+            nextFilter.execute(animal);
         }
 
-            @Override
-            public void setNextFilter (Filter nextfilter){
-                this.nextFilter = nextfilter;
-                System.out.println("StatisticsFilter next filter");
-            }
 
-        }
+    }
+
+    @Override
+    public void setNextFilter(Filter nextfilter) {
+        this.nextFilter = nextfilter;
+        System.out.println("StatisticsFilter next filter");
+    }
+
+}
