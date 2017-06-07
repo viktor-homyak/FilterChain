@@ -1,24 +1,18 @@
 package com.tutorials;
 
-import com.alibaba.fastjson.JSON;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 import com.tutorials.entity.AnimalEntity;
 import com.tutorials.entity.LimbEntity;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.io.*;
-import java.util.ArrayDeque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.stream.IntStream;
 
 /**
  * Created by vhomyak on 30.05.2017.
@@ -26,46 +20,52 @@ import java.util.stream.IntStream;
 public class AnimalPool {
 
     private LinkedList<AnimalEntity> animals;
-    private Jedis jedis;
-    private Kryo kryo;
-    private Output output;
-    private Input input;
+    private final byte[] key = "list".getBytes();
+
     private static final String redisHost = "localhost";
     private static final Integer redisPort = 6379;
-    private static JedisPool connectionPool = null;
+    public static JedisPool connectionPool = null;
+
+
+    public byte[] getKey() {
+        return key;
+    }
+
+
 
     public List<AnimalEntity> getAnimals() {
         return animals;
     }
 
     public AnimalPool(LinkedList<AnimalEntity> animals) {
-        kryo = new Kryo();
-        kryo.register(AnimalEntity.class);
-        kryo.register(LimbEntity.class);
+        // kryo = new Kryo();
+//        kryo.register(AnimalEntity.class);
+//        kryo.register(LimbEntity.class);
 
-        output = new Output(new ByteBufferOutput());
-        input = new Input(new ByteBufferInput());
 
         connectionPool = new JedisPool(redisHost, redisPort);
-
-        jedis = connectionPool.getResource();
-
         this.animals = animals;
     }
 
+    public AnimalPool() {
+        connectionPool = new JedisPool(redisHost, redisPort);
+
+    }
+
+
     public String produce() throws InterruptedException {
-        synchronized (jedis) {
+        Output output = new Output(new ByteBufferOutput());
+        Jedis jedis = connectionPool.getResource();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        output.setOutputStream(stream);
+        Kryo kryo = new Kryo();
+        kryo.writeObject(output, animals.removeFirst());
 
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            output.setOutputStream(stream);
-            kryo.writeObject(output, animals.removeFirst());
-            output.close();
-            jedis.lpush("list".getBytes(), stream.toByteArray());
+        jedis.rpush(key, stream.toByteArray());
+        output.close();
+        jedis.close();
+        return "Added";
 
-
-            return "Added";
-
-        }
 
 //        synchronized (pool) {
 //            while (pool.size() > 20) {
@@ -81,21 +81,25 @@ public class AnimalPool {
     }
 
     public AnimalEntity consume() throws InterruptedException {
+        Kryo kryo = new Kryo();
+        kryo.register(AnimalEntity.class);
+        kryo.register(LimbEntity.class);
+        Jedis jedis = connectionPool.getResource();
+//            while (jedis.llen(key) == 0) {
+//                jedis.wait();
+//            }
 
-        synchronized (jedis) {
-            while (jedis.llen("list") == 0) {
-                jedis.wait();
-            }
-            byte[] byteObject = jedis.lpop("list".getBytes());
+        byte[] byteObject = jedis.lpop(key);
 
-            ByteArrayInputStream stream = new ByteArrayInputStream(byteObject);
-            input.setInputStream(stream);
-            AnimalEntity animalEntity = kryo.readObject(input, AnimalEntity.class);
-            input.close();
-            jedis.notifyAll();
-            return animalEntity;
 
-        }
+        Input input = new Input(new ByteArrayInputStream(byteObject));
+
+        AnimalEntity animalEntity = kryo.readObjectOrNull(input, AnimalEntity.class);
+        input.close();
+        jedis.close();
+        // jedis.notifyAll();
+
+        return animalEntity;
 
 
 //        synchronized (pool) {

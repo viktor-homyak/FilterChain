@@ -4,6 +4,8 @@ import com.tutorials.Filter.*;
 import com.tutorials.entity.AnimalEntity;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,21 +36,22 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        AnimalPool pool = new AnimalPool();
         DBBroker dbBroker = new DBBroker();
         dbBroker.init();
-        Session session = dbBroker.getConnection();
+    //    Session session = dbBroker.getConnection();
+//
+//
+//        Query animalQuery = session.createQuery("SELECT a from AnimalEntity as a WHERE a.id in (:param)")
+//                .setParameterList("param", getRandomAnimalsId());
+//        List<AnimalEntity> animalEntities = animalQuery.list();
+//        LinkedList<AnimalEntity> linkedList = new LinkedList<>();
+//        //linked list is a best practice for deleting elements from head or tail of this collection
+//        linkedList.addAll(animalEntities);
+//
 
-
-        Query animalQuery = session.createQuery("SELECT a from AnimalEntity as a WHERE a.id in (:param)")
-                .setParameterList("param", getRandomAnimalsId());
-        List<AnimalEntity> animalEntities = animalQuery.list();
-        LinkedList<AnimalEntity> linkedList = new LinkedList<>();
-        //linked list is a best practice for deleting elements from head or tail of this collection
-        linkedList.addAll(animalEntities);
-
-        AnimalPool pool = new AnimalPool(linkedList);
-
-        session.close();
+//
+//        session.close();
 
 
         DefaultThreadFactory factory = new DefaultThreadFactory("Filter Thread");
@@ -56,17 +59,21 @@ public class Main {
 
 
         // IntStream.range(0, 5).forEach(index -> {
-        sessionsToExecute.add(new AnimalProducer(pool));
+
+       // AnimalProducer.main(new String[]{"foo"});
+
+
         // });
 
-        IntStream.range(0, 2).forEach(index -> {
+        IntStream.range(0, 3).forEach(index -> {
             Callable<String> consumer = new Callable<String>() {
                 public String call() throws Exception {
-                    while (!pool.getAnimals().isEmpty()) {
+                    Jedis jedis = AnimalPool.connectionPool.getResource();
+                    while (jedis.llen(pool.getKey())!=0) {
                         Main main = new Main(dbBroker);
                         main.f1.execute(pool.consume());
                     }
-
+                    jedis.close();
                     return "all good";
                 }
             };
@@ -93,15 +100,15 @@ public class Main {
 
     }
 
-    public static List<Integer> getRandomAnimalsId() {
-        Random random = new Random();
-
-        ArrayList<Integer> list = new ArrayList<>();
-
-        IntStream.range(0, 5).forEach(i -> list.add(Integer.valueOf(random.nextInt(100000))));
-        ;
-        return list;
-    }
+//    public static List<Integer> getRandomAnimalsId() {
+//        Random random = new Random();
+//
+//        ArrayList<Integer> list = new ArrayList<>();
+//
+//        IntStream.range(0, 5).forEach(i -> list.add(Integer.valueOf(random.nextInt(100000))));
+//        ;
+//        return list;
+//    }
 
 
 }
