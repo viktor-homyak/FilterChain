@@ -42,9 +42,11 @@ public class Main {
         Query animalQuery = session.createQuery("SELECT a from AnimalEntity as a WHERE a.id in (:param)")
                 .setParameterList("param", getRandomAnimalsId());
         List<AnimalEntity> animalEntities = animalQuery.list();
+        LinkedList<AnimalEntity> linkedList = new LinkedList<>();
+        //linked list is a best practice for deleting elements from head or tail of this collection
+        linkedList.addAll(animalEntities);
 
-
-        AnimalPool pool = new AnimalPool(animalEntities);
+        AnimalPool pool = new AnimalPool(linkedList);
 
         session.close();
 
@@ -53,11 +55,11 @@ public class Main {
         List<Callable<String>> sessionsToExecute = new ArrayList<>();
 
 
-        IntStream.range(0, 5).forEach(index -> {
-            sessionsToExecute.add(new AnimalProducer(pool));
-        });
+        // IntStream.range(0, 5).forEach(index -> {
+        sessionsToExecute.add(new AnimalProducer(pool));
+        // });
 
-        IntStream.range(0, 5).forEach(index -> {
+        IntStream.range(0, 2).forEach(index -> {
             Callable<String> consumer = new Callable<String>() {
                 public String call() throws Exception {
                     while (!pool.getAnimals().isEmpty()) {
@@ -96,7 +98,7 @@ public class Main {
 
         ArrayList<Integer> list = new ArrayList<>();
 
-        IntStream.range(0, 500).forEach(i -> list.add(Integer.valueOf(random.nextInt(100000))));
+        IntStream.range(0, 5).forEach(i -> list.add(Integer.valueOf(random.nextInt(100000))));
         ;
         return list;
     }

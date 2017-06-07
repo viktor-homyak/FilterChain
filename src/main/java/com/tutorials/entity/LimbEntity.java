@@ -1,5 +1,7 @@
 package com.tutorials.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import javax.persistence.*;
 /**
  * Created by Viktor on 16.05.2017.
@@ -7,9 +9,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "limb", schema = "public", catalog = "filterchain")
 public class LimbEntity {
+    //@JSONField(name = "name")
     private String name;
+   // @JSONField(name = "id")
     private Integer id;
+   // @JSONField(name = "animal")
     private AnimalEntity animal;
+    //@JSONField(name = "order")
     private Integer order;
 
 
@@ -48,7 +54,7 @@ public class LimbEntity {
     }
 
 
-    @ManyToOne(cascade = CascadeType.ALL, targetEntity = AnimalEntity.class, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.ALL, targetEntity = AnimalEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
     public AnimalEntity getAnimal() {
         return animal;

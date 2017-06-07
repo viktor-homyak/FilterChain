@@ -1,5 +1,10 @@
 package com.tutorials.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Sort;
@@ -15,11 +20,16 @@ import java.util.List;
  */
 @Entity
 @Table(name = "animal", schema = "public", catalog = "filterchain")
-public class AnimalEntity {
+public class AnimalEntity  {
+   // @JSONField(name = "face")
     private byte[] face;
+   // @JSONField(name = "id")
     private Integer id;
+   // @JSONField(name = "name")
     private String name;
+   // @JSONField(name = "name")
     private List<LimbEntity> limbs;
+   // @JSONField(name = "height")
     private Integer height;
 
     @Basic
@@ -97,4 +107,5 @@ public class AnimalEntity {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
+
 }
