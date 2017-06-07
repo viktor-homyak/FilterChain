@@ -3,6 +3,7 @@ package com.tutorials;
 import com.tutorials.entity.AnimalEntity;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ public class AnimalProducer {
             }
 
         }
+        Jedis jedis = AnimalPool.connectionPool.getResource();
+       jedis.expire(pool.getKey(), 60);
     }
 
     public static List<Integer> getRandomAnimalsId() {

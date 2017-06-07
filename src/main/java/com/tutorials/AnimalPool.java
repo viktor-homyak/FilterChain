@@ -56,6 +56,7 @@ public class AnimalPool {
     public String produce() throws InterruptedException {
         Output output = new Output(new ByteBufferOutput());
         Jedis jedis = connectionPool.getResource();
+
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         output.setOutputStream(stream);
         Kryo kryo = new Kryo();
