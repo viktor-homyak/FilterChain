@@ -72,7 +72,7 @@ public class AnimalProducer {
 
         }
         Jedis jedis = AnimalPool.connectionPool.getResource();
-       jedis.expire(pool.getKey(), 60);
+       jedis.expire(pool.getKey(), 1000);
     }
 
     public static List<Integer> getRandomAnimalsId() {

@@ -1,15 +1,18 @@
 package com.tutorials;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.tutorials.entity.AnimalEntity;
 import com.tutorials.entity.LimbEntity;
+import org.hibernate.Session;
+import org.hibernate.collection.internal.AbstractPersistentCollection;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,10 +24,11 @@ public class AnimalPool {
 
     private LinkedList<AnimalEntity> animals;
     private final byte[] key = "list".getBytes();
-
+    private Kryo kryo;
     private static final String redisHost = "localhost";
     private static final Integer redisPort = 6379;
     public static JedisPool connectionPool = null;
+
 
 
     public byte[] getKey() {
@@ -38,33 +42,59 @@ public class AnimalPool {
     }
 
     public AnimalPool(LinkedList<AnimalEntity> animals) {
-        // kryo = new Kryo();
-//        kryo.register(AnimalEntity.class);
-//        kryo.register(LimbEntity.class);
-
-
         connectionPool = new JedisPool(redisHost, redisPort);
         this.animals = animals;
+        this.kryo =   new Kryo() {
+            @Override
+            public Serializer<?> getDefaultSerializer(final Class type ) {
+                if (AbstractPersistentCollection.class.isAssignableFrom( type )) {
+                    return new FieldSerializer( kryo, type );
+                }
+                return super.getDefaultSerializer( type );
+            }
+        };
+        kryo.register(LimbEntity.class);
+        kryo.register(AnimalEntity.class);
+
+
     }
 
     public AnimalPool() {
         connectionPool = new JedisPool(redisHost, redisPort);
-
+        this.kryo =   new Kryo() {
+            @Override
+            public Serializer<?> getDefaultSerializer(final Class type ) {
+                if (AbstractPersistentCollection.class.isAssignableFrom( type )) {
+                    return new FieldSerializer( kryo, type );
+                }
+                return super.getDefaultSerializer( type );
+            }
+        };
+        kryo.register(LimbEntity.class);
+        kryo.register(AnimalEntity.class);
     }
 
 
     public String produce() throws InterruptedException {
-        Output output = new Output(new ByteBufferOutput());
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        Output output = new Output(stream);
         Jedis jedis = connectionPool.getResource();
 
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        output.setOutputStream(stream);
-        Kryo kryo = new Kryo();
+//        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//        output.setOutputStream(stream);
+
+
         kryo.writeObject(output, animals.removeFirst());
+        output.close();
+        Input input = new Input(new ByteArrayInputStream(stream.toByteArray()));
+            input.close();
+        AnimalEntity animalEntity = kryo.readObjectOrNull(input,AnimalEntity.class);
 
         jedis.rpush(key, stream.toByteArray());
-        output.close();
+
         jedis.close();
+
+
         return "Added";
 
 
@@ -82,9 +112,7 @@ public class AnimalPool {
     }
 
     public AnimalEntity consume() throws InterruptedException {
-        Kryo kryo = new Kryo();
-        kryo.register(AnimalEntity.class);
-        kryo.register(LimbEntity.class);
+
         Jedis jedis = connectionPool.getResource();
 //            while (jedis.llen(key) == 0) {
 //                jedis.wait();
@@ -94,9 +122,9 @@ public class AnimalPool {
 
 
         Input input = new Input(new ByteArrayInputStream(byteObject));
-
-        AnimalEntity animalEntity = kryo.readObjectOrNull(input, AnimalEntity.class);
         input.close();
+        AnimalEntity animalEntity = kryo.readObjectOrNull(input, AnimalEntity.class);
+
         jedis.close();
         // jedis.notifyAll();
 
